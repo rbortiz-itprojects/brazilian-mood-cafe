@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cozinha — Painel de Pedidos</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --cream:#FBF6EC; --ink:#2E1D14; --green:#1B4332; --gold:#E8A93D; --terracotta:#C1440E;
+    --line: rgba(46,29,20,0.14);
+    --yellow-bg:#F7DE9A; --red-bg:#EFA69C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--ink); color:var(--cream); font-family:'Work Sans', sans-serif; }
+  header{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 24px; border-bottom:1px solid rgba(251,246,236,0.15);
+  }
+  header h1{ font-family:'Fraunces', serif; margin:0; font-size:1.4rem; }
+  header .clock{ font-family:'IBM Plex Mono'; color:var(--gold); }
+  .board{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+    gap:16px; padding:20px;
+  }
+  .ticket{
+    background:#fff; color:var(--ink); border-radius:14px; padding:16px;
+    border:2px solid transparent; cursor:pointer; position:relative;
+    transition:background 0.4s ease, border-color 0.4s ease;
+  }
+  .ticket.status-new{ border-color:var(--green); }
+  .ticket.status-in_preparation{ border-color:var(--gold); }
+  .ticket.status-in_preparation.warn-yellow{ background:var(--yellow-bg); }
+  .ticket.status-in_preparation.warn-red{ background:var(--red-bg); }
+  .ticket.status-done{ opacity:0.45; }
+
+  .ticket-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+  .table-badge{
+    font-family:'IBM Plex Mono'; background:var(--green); color:#fff;
+    padding:3px 10px; border-radius:6px; font-weight:600; font-size:0.85rem;
+  }
+  .status-pill{
+    font-family:'IBM Plex Mono'; font-size:0.75rem; font-weight:600; padding:4px 10px;
+    border-radius:999px; text-transform:uppercase; letter-spacing:0.03em;
+  }
+  .status-pill.new{ background:var(--green); color:#fff; }
+  .status-pill.in_preparation{ background:var(--gold); color:var(--ink); }
+  .status-pill.done{ background:#999; color:#fff; }
+
+  .customer{ font-weight:700; margin-bottom:2px; }
+  .timer{ font-family:'IBM Plex Mono'; font-weight:600; font-size:0.9rem; margin-bottom:10px; }
+  ul.items{ list-style:none; margin:0 0 12px; padding:0; }
+  ul.items li{ padding:4px 0; border-bottom:1px dashed var(--line); font-size:0.92rem; }
+  ul.items li .qty{ font-family:'IBM Plex Mono'; font-weight:600; margin-right:6px; }
+  ul.items li .note{ display:block; font-size:0.78rem; color:var(--terracotta); font-style:italic; }
+
+  .actions{ display:flex; gap:8px; }
+  .actions button{
+    flex:1; border:none; border-radius:8px; padding:10px; font-weight:700; cursor:pointer;
+    font-family:'Work Sans'; font-size:0.85rem;
+  }
+  .btn-start{ background:var(--gold); color:var(--ink); }
+  .btn-done{ background:var(--green); color:#fff; }
+  .btn-none{ background:#eee; color:#999; cursor:default; }
+
+  .empty{ text-align:center; padding:80px 20px; color:rgba(251,246,236,0.5); font-family:'Fraunces'; font-size:1.2rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍳 Painel da Cozinha</h1>
+  <div class="clock" id="clock"></div>
+</header>
+
+<div class="board" id="board"></div>
+
+<script src="config.js"></script>
+<script>
+let orders = []; // {id, table_number, customer_name, status, created_at, started_at, done_at, items:[...]}
+
+function fmtElapsed(ms){
+  const s = Math.floor(ms/1000);
+  const m = Math.floor(s/60);
+  const rem = s%60;
+  return `${String(m).padStart(2,'0')}:${String(rem).padStart(2,'0')}`;
+}
+
+async function loadOrders(){
+  const { data: ords } = await supabaseClient
+    .from('orders')
+    .select('*')
+    .neq('status', 'cancelled')
+    .order('created_at', { ascending: true });
+  const { data: items } = await supabaseClient.from('order_items').select('*');
+  orders = (ords || []).map(o => ({
+    ...o,
+    items: (items || []).filter(i => i.order_id === o.id)
+  }));
+  render();
+}
+
+function statusLabel(s){
+  return { new: 'Novo', in_preparation: 'Em preparo', done: 'Pronto' }[s] || s;
+}
+
+function render(){
+  const board = document.getElementById('board');
+  const active = orders.filter(o => o.status !== 'done');
+  const done = orders.filter(o => o.status === 'done').slice(-6).reverse();
+  const visible = [...active, ...done];
+
+  if (!visible.length){
+    board.innerHTML = '<div class="empty">Nenhum pedido no momento ☕</div>';
+    return;
+  }
+
+  board.innerHTML = visible.map(o => {
+    let warnClass = '';
+    let timerText = '—';
+    if (o.status === 'in_preparation' && o.started_at){
+      const elapsedMs = Date.now() - new Date(o.started_at).getTime();
+      const mins = elapsedMs / 60000;
+      if (mins >= 25) warnClass = 'warn-red';
+      else if (mins >= 15) warnClass = 'warn-yellow';
+      timerText = fmtElapsed(elapsedMs);
+    } else if (o.status === 'done' && o.started_at && o.done_at){
+      timerText = fmtElapsed(new Date(o.done_at) - new Date(o.started_at)) + ' (total)';
+    } else if (o.status === 'new'){
+      timerText = 'aguardando início';
+    }
+
+    const itemsHtml = o.items.map(it => `
+      <li><span class="qty">${it.quantity}x</span>${it.name_snapshot}
+        ${it.notes ? `<span class="note">obs: ${it.notes}</span>` : ''}
+      </li>`).join('');
+
+    let actionsHtml = '';
+    if (o.status === 'new'){
+      actionsHtml = `<button class="btn-start" onclick="setStatus('${o.id}','in_preparation')">Iniciar preparo</button>`;
+    } else if (o.status === 'in_preparation'){
+      actionsHtml = `<button class="btn-done" onclick="setStatus('${o.id}','done')">Marcar como pronto</button>`;
+    } else {
+      actionsHtml = `<button class="btn-none" disabled>Concluído</button>`;
+    }
+
+    return `<div class="ticket status-${o.status} ${warnClass}">
+      <div class="ticket-top">
+        <span class="table-badge">MESA ${o.table_number}</span>
+        <span class="status-pill ${o.status}">${statusLabel(o.status)}</span>
+      </div>
+      <div class="customer">${o.customer_name}</div>
+      <div class="timer">${timerText}</div>
+      <ul class="items">${itemsHtml}</ul>
+      <div class="actions">${actionsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+async function setStatus(id, newStatus){
+  const patch = { status: newStatus };
+  if (newStatus === 'in_preparation') patch.started_at = new Date().toISOString();
+  if (newStatus === 'done') patch.done_at = new Date().toISOString();
+  await supabaseClient.from('orders').update(patch).eq('id', id);
+  // optimistic local update happens via realtime subscription below
+}
+
+function tickClock(){
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('pt-BR');
+}
+setInterval(tickClock, 1000); tickClock();
+
+// Re-render every second so timers move and color thresholds trigger live
+setInterval(render, 1000);
+
+// Realtime subscription: reload on any order/order_item change
+supabaseClient.channel('kitchen-orders')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, loadOrders)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, loadOrders)
+  .subscribe();
+
+loadOrders();
+</script>
+</body>
+</html>

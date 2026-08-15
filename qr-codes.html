@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QR Codes — Mesas</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  body{ font-family:sans-serif; background:#f2f2f2; padding:24px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
+  .card{ background:#fff; border-radius:12px; padding:16px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.1); }
+  .card h2{ margin:6px 0; }
+  input{ width:200px; padding:8px; margin:8px 0; }
+  @media print { body{ background:#fff; } input, button.controls{ display:none; } }
+</style>
+</head>
+<body>
+  <h1>Gerador de QR Codes das mesas</h1>
+  <p>Base URL da página do cliente (ex: <code>https://seu-app.vercel.app</code>):</p>
+  <input type="text" id="baseUrl" value="https://YOUR-APP.vercel.app" onchange="render()">
+  <p>Número de mesas: <input type="number" id="numTables" value="5" style="width:60px;" onchange="render()"></p>
+  <div class="grid" id="grid"></div>
+
+<script>
+async function render(){
+  const base = document.getElementById('baseUrl').value.replace(/\/$/, '');
+  const n = parseInt(document.getElementById('numTables').value) || 1;
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (let i = 1; i <= n; i++){
+    const url = `${base}/index.html?table=${i}`;
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `<h2>Mesa ${i}</h2><canvas id="qr-${i}"></canvas><p style="font-size:0.75rem;word-break:break-all;">${url}</p>`;
+    grid.appendChild(div);
+    await QRCode.toCanvas(div.querySelector('canvas'), url, { width: 180 });
+  }
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cardápio — Mesa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --cream:#FBF6EC;
+    --ink:#2E1D14;
+    --green:#1B4332;
+    --gold:#E8A93D;
+    --terracotta:#C1440E;
+    --line: rgba(46,29,20,0.14);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--cream); color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    padding-bottom: 96px;
+  }
+  header.top{
+    background:var(--green); color:var(--cream);
+    padding:22px 20px 26px;
+    position:relative;
+  }
+  header.top::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-1px; height:14px;
+    background-image: radial-gradient(circle at 7px 0, transparent 7px, var(--green) 7.5px);
+    background-size: 14px 14px;
+    background-position: 0 -7px;
+  }
+  header.top h1{
+    font-family:'Fraunces', serif; font-weight:700; font-size:1.6rem; margin:0 0 2px;
+  }
+  header.top .table-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:0.8rem;
+    color:var(--gold); letter-spacing:0.03em;
+  }
+  nav.cats{
+    display:flex; gap:8px; overflow-x:auto; padding:18px 16px 4px;
+    position:sticky; top:0; background:var(--cream); z-index:5;
+    border-bottom:1px solid var(--line);
+  }
+  nav.cats button{
+    flex:0 0 auto; border:1px solid var(--line); background:#fff;
+    color:var(--ink); padding:8px 16px; border-radius:999px;
+    font-family:'Work Sans'; font-weight:600; font-size:0.85rem;
+    cursor:pointer;
+  }
+  nav.cats button.active{ background:var(--terracotta); border-color:var(--terracotta); color:#fff; }
+
+  main{ padding:16px; max-width:640px; margin:0 auto; }
+  section.category h2{
+    font-family:'Fraunces', serif; font-size:1.2rem; margin:26px 0 12px;
+  }
+  .item-card{
+    display:flex; gap:12px; background:#fff; border:1px solid var(--line);
+    border-radius:var(--radius); padding:12px; margin-bottom:10px;
+  }
+  .item-card img{
+    width:78px; height:78px; object-fit:cover; border-radius:10px; flex:0 0 auto;
+    background:#eee;
+  }
+  .item-info{ flex:1; min-width:0; }
+  .item-info h3{ margin:0 0 4px; font-size:1rem; font-family:'Work Sans'; font-weight:600; }
+  .item-info p.desc{ margin:0 0 6px; font-size:0.85rem; color:#5c4b3f; line-height:1.35; }
+  .item-info p.notes{ margin:0 0 6px; font-size:0.75rem; color:var(--terracotta); font-style:italic; }
+  .item-row-bottom{ display:flex; align-items:center; justify-content:space-between; }
+  .price{ font-family:'IBM Plex Mono', monospace; font-weight:500; }
+  button.add-btn{
+    background:var(--green); color:#fff; border:none; border-radius:8px;
+    padding:6px 14px; font-weight:600; cursor:pointer; font-size:0.85rem;
+  }
+  .qty-controls{ display:flex; align-items:center; gap:8px; }
+  .qty-controls button{
+    width:26px; height:26px; border-radius:50%; border:1px solid var(--line);
+    background:#fff; cursor:pointer; font-size:1rem; line-height:1;
+  }
+
+  /* Cart bar */
+  #cartBar{
+    position:fixed; bottom:0; left:0; right:0; background:var(--terracotta); color:#fff;
+    padding:14px 20px; display:none; align-items:center; justify-content:space-between;
+    cursor:pointer; font-weight:600;
+  }
+  #cartBar .count{ font-family:'IBM Plex Mono'; margin-right:8px; }
+
+  /* Cart drawer */
+  #overlay{ position:fixed; inset:0; background:rgba(46,29,20,0.5); display:none; z-index:20; }
+  #drawer{
+    position:fixed; right:0; top:0; bottom:0; width:100%; max-width:420px;
+    background:var(--cream); z-index:21; transform:translateX(100%);
+    transition:transform 0.25s ease; display:flex; flex-direction:column;
+  }
+  #drawer.open{ transform:translateX(0); }
+  #overlay.open{ display:block; }
+  .drawer-head{ padding:20px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
+  .drawer-head h2{ font-family:'Fraunces'; margin:0; }
+  .drawer-body{ flex:1; overflow-y:auto; padding:16px 20px; }
+  .cart-line{ display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px dashed var(--line); }
+  .cart-line .notes-input{
+    width:100%; margin-top:4px; font-size:0.8rem; padding:5px 8px; border:1px solid var(--line);
+    border-radius:6px; font-family:'Work Sans';
+  }
+  .drawer-foot{ padding:16px 20px 24px; border-top:1px solid var(--line); }
+  .total-row{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono'; font-weight:600; margin-bottom:14px; font-size:1.05rem; }
+  input[type=text], input[type=tel]{
+    width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:8px;
+    font-family:'Work Sans'; font-size:0.95rem; margin-bottom:10px;
+  }
+  label.checkbox{ display:flex; align-items:center; gap:8px; font-size:0.85rem; margin-bottom:14px; }
+  button.primary{
+    width:100%; background:var(--green); color:#fff; border:none; border-radius:10px;
+    padding:14px; font-weight:700; font-size:1rem; cursor:pointer; font-family:'Work Sans';
+  }
+  button.primary:disabled{ opacity:0.5; cursor:not-allowed; }
+  #confirmScreen{ text-align:center; padding:60px 24px; }
+  #confirmScreen h2{ font-family:'Fraunces'; }
+  #confirmScreen .stamp{
+    font-family:'IBM Plex Mono'; background:var(--gold); color:var(--ink);
+    display:inline-block; padding:8px 18px; border-radius:8px; margin:16px 0; font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Brazilian Mood</h1>
+  <div class="table-tag" id="tableTag">MESA —</div>
+</header>
+
+<nav class="cats" id="catNav"></nav>
+
+<main id="menuRoot"></main>
+
+<div id="cartBar" onclick="openDrawer()">
+  <span><span class="count" id="cartCount">0</span>itens no carrinho</span>
+  <span id="cartTotalTag">R$ 0,00</span>
+</div>
+
+<div id="overlay" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <div class="drawer-head">
+    <h2>Seu pedido</h2>
+    <button onclick="closeDrawer()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;">&times;</button>
+  </div>
+  <div class="drawer-body" id="cartLines"></div>
+  <div class="drawer-foot" id="checkoutForm">
+    <div class="total-row"><span>Total</span><span id="drawerTotal">R$ 0,00</span></div>
+    <input type="text" id="custName" placeholder="Seu primeiro nome *" required>
+    <input type="tel" id="custPhone" placeholder="Telefone (opcional, para SMS)">
+    <label class="checkbox">
+      <input type="checkbox" id="smsOptIn">
+      Quero receber SMS sobre o status do meu pedido
+    </label>
+    <button class="primary" id="sendOrderBtn" onclick="submitOrder()">Enviar pedido para a cozinha</button>
+  </div>
+</div>
+
+<div id="confirmScreen" style="display:none;">
+  <h2>Pedido enviado! 🎉</h2>
+  <p>A cozinha já recebeu seu pedido.</p>
+  <div class="stamp" id="orderRef"></div>
+  <p>Fique à vontade, vamos te avisar quando estiver pronto.</p>
+</div>
+
+<script src="config.js"></script>
+<script>
+let categories = [];
+let items = [];
+let cart = {}; // menu_item_id -> {item, qty, notes}
+const params = new URLSearchParams(location.search);
+const tableNumber = params.get('table') || '?';
+document.getElementById('tableTag').textContent = `MESA ${tableNumber}`;
+
+function money(cents){ return 'R$ ' + (cents/100).toFixed(2).replace('.', ','); }
+
+async function loadMenu(){
+  const { data: cats } = await supabaseClient.from('categories').select('*').order('sort_order');
+  const { data: mi } = await supabaseClient.from('menu_items').select('*').order('sort_order');
+  categories = cats || []; items = mi || [];
+  renderNav(); renderMenu();
+}
+
+function renderNav(){
+  const nav = document.getElementById('catNav');
+  nav.innerHTML = categories.map((c,i) =>
+    `<button data-id="${c.id}" class="${i===0?'active':''}" onclick="scrollToCat('${c.id}', this)">${c.name}</button>`
+  ).join('');
+}
+
+function scrollToCat(id, btn){
+  document.querySelectorAll('#catNav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('cat-'+id).scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function renderMenu(){
+  const root = document.getElementById('menuRoot');
+  root.innerHTML = categories.map(c => {
+    const catItems = items.filter(i => i.category_id === c.id);
+    if (!catItems.length) return '';
+    return `<section class="category" id="cat-${c.id}">
+      <h2>${c.name}</h2>
+      ${catItems.map(renderItem).join('')}
+    </section>`;
+  }).join('');
+}
+
+function renderItem(item){
+  return `<div class="item-card">
+    ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}">` : ''}
+    <div class="item-info">
+      <h3>${item.name}</h3>
+      ${item.description ? `<p class="desc">${item.description}</p>` : ''}
+      ${item.notes ? `<p class="notes">${item.notes}</p>` : ''}
+      <div class="item-row-bottom">
+        <span class="price">${money(item.price_cents)}</span>
+        <div id="ctrl-${item.id}">
+          <button class="add-btn" onclick="addToCart('${item.id}')">Adicionar</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function addToCart(id){
+  const item = items.find(i => i.id === id);
+  if (!cart[id]) cart[id] = { item, qty: 0, notes: '' };
+  cart[id].qty++;
+  refreshItemControl(id);
+  refreshCartBar();
+}
+function changeQty(id, delta){
+  if (!cart[id]) return;
+  cart[id].qty += delta;
+  if (cart[id].qty <= 0) delete cart[id];
+  refreshItemControl(id);
+  refreshCartBar();
+  renderCartLines();
+}
+function refreshItemControl(id){
+  const el = document.getElementById('ctrl-'+id);
+  if (!el) return;
+  const line = cart[id];
+  if (!line) { el.innerHTML = `<button class="add-btn" onclick="addToCart('${id}')">Adicionar</button>`; return; }
+  el.innerHTML = `<div class="qty-controls">
+    <button onclick="changeQty('${id}',-1)">−</button>
+    <span>${line.qty}</span>
+    <button onclick="changeQty('${id}',1)">+</button>
+  </div>`;
+}
+
+function cartTotal(){
+  return Object.values(cart).reduce((sum,l) => sum + l.item.price_cents * l.qty, 0);
+}
+function cartCount(){
+  return Object.values(cart).reduce((sum,l) => sum + l.qty, 0);
+}
+function refreshCartBar(){
+  const bar = document.getElementById('cartBar');
+  const n = cartCount();
+  bar.style.display = n > 0 ? 'flex' : 'none';
+  document.getElementById('cartCount').textContent = n;
+  document.getElementById('cartTotalTag').textContent = money(cartTotal());
+  document.getElementById('drawerTotal').textContent = money(cartTotal());
+}
+
+function renderCartLines(){
+  const wrap = document.getElementById('cartLines');
+  const lines = Object.entries(cart);
+  if (!lines.length){ wrap.innerHTML = '<p style="color:#8a7a6d;">Seu carrinho está vazio.</p>'; return; }
+  wrap.innerHTML = lines.map(([id,l]) => `
+    <div class="cart-line">
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;">
+          <strong>${l.qty}x ${l.item.name}</strong>
+          <span class="price">${money(l.item.price_cents * l.qty)}</span>
+        </div>
+        <input class="notes-input" placeholder="Alguma observação? (ex: sem açúcar)"
+          value="${l.notes}" onchange="setNote('${id}', this.value)">
+      </div>
+    </div>
+  `).join('');
+}
+function setNote(id, val){ cart[id].notes = val; }
+
+function openDrawer(){
+  renderCartLines();
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+async function submitOrder(){
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const smsOptIn = document.getElementById('smsOptIn').checked;
+  if (!name){ alert('Por favor, digite seu nome.'); return; }
+  if (!cartCount()){ alert('Seu carrinho está vazio.'); return; }
+
+  const btn = document.getElementById('sendOrderBtn');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+
+  const { data: order, error } = await supabaseClient.from('orders').insert({
+    table_number: parseInt(tableNumber) || 0,
+    customer_name: name,
+    customer_phone: phone || null,
+    sms_opt_in: smsOptIn && !!phone,
+    total_cents: cartTotal(),
+    status: 'new'
+  }).select().single();
+
+  if (error){ alert('Erro ao enviar pedido: ' + error.message); btn.disabled=false; btn.textContent='Enviar pedido para a cozinha'; return; }
+
+  const lineItems = Object.values(cart).map(l => ({
+    order_id: order.id,
+    menu_item_id: l.item.id,
+    name_snapshot: l.item.name,
+    price_cents_snapshot: l.item.price_cents,
+    quantity: l.qty,
+    notes: l.notes || ''
+  }));
+  await supabaseClient.from('order_items').insert(lineItems);
+
+  closeDrawer();
+  document.querySelector('main').style.display = 'none';
+  document.getElementById('catNav').style.display = 'none';
+  document.getElementById('cartBar').style.display = 'none';
+  document.getElementById('confirmScreen').style.display = 'block';
+  document.getElementById('orderRef').textContent = 'PEDIDO #' + order.id.slice(0,8).toUpperCase();
+}
+
+loadMenu();
+</script>
+</body>
+</html>
