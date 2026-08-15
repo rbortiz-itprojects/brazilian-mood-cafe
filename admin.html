@@ -23,16 +23,19 @@
   main{ max-width:900px; margin:0 auto; padding:24px; }
   .panel{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:20px; }
   .panel h2{ font-family:'Fraunces'; margin-top:0; }
-  table{ width:100%; border-collapse:collapse; }
-  th, td{ text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); font-size:0.9rem; vertical-align:top; }
+  table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+  th, td{ text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); font-size:0.9rem; vertical-align:top; overflow-wrap:break-word; }
   th{ font-family:'IBM Plex Mono'; font-size:0.75rem; text-transform:uppercase; color:#8a7a6d; }
   input, textarea, select{ width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px; font-family:'Work Sans'; font-size:0.85rem; }
   textarea{ resize:vertical; min-height:38px; }
-  .row-actions button{ margin-right:6px; padding:5px 10px; border-radius:6px; border:none; cursor:pointer; font-size:0.8rem; }
+  input[data-field="image_url"]{ font-family:'IBM Plex Mono'; font-size:0.72rem; text-overflow:ellipsis; }
+  .row-actions{ display:flex; flex-direction:column; gap:6px; width:100%; }
+  .row-actions button{ width:100%; padding:6px 10px; border-radius:6px; border:none; cursor:pointer; font-size:0.8rem; }
   .btn-save{ background:var(--green); color:#fff; }
   .btn-delete{ background:var(--terracotta); color:#fff; }
   .btn-add{ background:var(--gold); color:var(--ink); border:none; padding:10px 18px; border-radius:8px; font-weight:700; cursor:pointer; margin-top:10px; }
   .active-toggle{ display:flex; align-items:center; gap:6px; }
+  .table-scroll{ overflow-x:auto; }
 </style>
 </head>
 <body>
@@ -54,19 +57,31 @@
   <main>
     <div class="panel">
       <h2>Categorias</h2>
+      <div class="table-scroll">
       <table id="catTable">
+        <colgroup>
+          <col style="width:auto;"><col style="width:70px;"><col style="width:70px;"><col style="width:100px;">
+        </colgroup>
         <thead><tr><th>Nome</th><th>Ordem</th><th>Ativa</th><th></th></tr></thead>
         <tbody id="catBody"></tbody>
       </table>
+      </div>
       <button class="btn-add" onclick="addCategoryRow()">+ Nova categoria</button>
     </div>
 
     <div class="panel">
       <h2>Itens do cardápio</h2>
+      <div class="table-scroll">
       <table id="itemTable">
+        <colgroup>
+          <col style="width:100px;"><col style="width:120px;"><col style="width:200px;">
+          <col style="width:70px;"><col style="width:220px;"><col style="width:130px;">
+          <col style="width:60px;"><col style="width:100px;">
+        </colgroup>
         <thead><tr><th>Categoria</th><th>Nome</th><th>Descrição</th><th>Preço (R$)</th><th>Imagem (URL)</th><th>Obs.</th><th>Ativo</th><th></th></tr></thead>
         <tbody id="itemBody"></tbody>
       </table>
+      </div>
       <button class="btn-add" onclick="addItemRow()">+ Novo item</button>
     </div>
   </main>
@@ -105,9 +120,11 @@ function renderCategories(){
       <td><input value="${c.name}" data-field="name"></td>
       <td style="width:70px;"><input type="number" value="${c.sort_order}" data-field="sort_order"></td>
       <td class="active-toggle"><input type="checkbox" ${c.active?'checked':''} data-field="active"></td>
-      <td class="row-actions">
-        <button class="btn-save" onclick="saveCategory('${c.id}', this)">Salvar</button>
-        <button class="btn-delete" onclick="deleteCategory('${c.id}')">Excluir</button>
+      <td>
+        <div class="row-actions">
+          <button class="btn-save" onclick="saveCategory('${c.id}', this)">Salvar</button>
+          <button class="btn-delete" onclick="deleteCategory('${c.id}')">Excluir</button>
+        </div>
       </td>
     </tr>`).join('');
 }
@@ -150,12 +167,14 @@ function renderItems(){
       <td><input value="${i.name}" data-field="name"></td>
       <td><textarea data-field="description">${i.description||''}</textarea></td>
       <td style="width:80px;"><input type="number" step="0.01" value="${(i.price_cents/100).toFixed(2)}" data-field="price"></td>
-      <td><input value="${i.image_url||''}" data-field="image_url"></td>
+      <td><input value="${i.image_url||''}" data-field="image_url" title="${(i.image_url||'').replace(/"/g,'&quot;')}"></td>
       <td><input value="${i.notes||''}" data-field="notes"></td>
       <td class="active-toggle"><input type="checkbox" ${i.active?'checked':''} data-field="active"></td>
-      <td class="row-actions">
-        <button class="btn-save" onclick="saveItem('${i.id}', this)">Salvar</button>
-        <button class="btn-delete" onclick="deleteItem('${i.id}')">Excluir</button>
+      <td>
+        <div class="row-actions">
+          <button class="btn-save" onclick="saveItem('${i.id}', this)">Salvar</button>
+          <button class="btn-delete" onclick="deleteItem('${i.id}')">Excluir</button>
+        </div>
       </td>
     </tr>`).join('');
 }

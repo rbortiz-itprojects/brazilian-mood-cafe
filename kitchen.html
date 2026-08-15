@@ -180,6 +180,10 @@ supabaseClient.channel('kitchen-orders')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, loadOrders)
   .subscribe();
 
+// Fallback: also poll every 10s in case realtime isn't connected
+// (e.g. Replication not enabled yet, or a flaky network)
+setInterval(loadOrders, 10000);
+
 loadOrders();
 </script>
 </body>
