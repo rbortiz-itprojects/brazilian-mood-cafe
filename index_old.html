@@ -21,7 +21,7 @@
   body{
     margin:0; background:var(--cream); color:var(--ink);
     font-family:'Work Sans', sans-serif;
-    padding-bottom: 110px;
+    padding-bottom: 96px;
   }
   header.top{
     background:var(--green); color:var(--cream);
@@ -85,19 +85,11 @@
 
   /* Cart bar */
   #cartBar{
-    position:fixed; left:16px; right:16px; bottom:16px; background:var(--terracotta); color:#fff;
-    padding:16px 22px; border-radius:14px; display:none; align-items:center; justify-content:space-between;
-    cursor:pointer; font-weight:700; box-shadow:0 6px 20px rgba(46,29,20,0.35);
-    z-index:15; transition:transform 0.15s ease;
+    position:fixed; bottom:0; left:0; right:0; background:var(--terracotta); color:#fff;
+    padding:14px 20px; display:none; align-items:center; justify-content:space-between;
+    cursor:pointer; font-weight:600;
   }
-  #cartBar:active{ transform:scale(0.97); }
-  #cartBar .cart-left{ display:flex; align-items:center; gap:10px; }
-  #cartBar .badge{
-    background:rgba(255,255,255,0.25); border-radius:999px; width:26px; height:26px;
-    display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-size:0.9rem;
-  }
-  #cartBar .cta{ display:flex; align-items:center; gap:6px; }
-  #cartBar .cta .arrow{ font-size:1.1rem; }
+  #cartBar .count{ font-family:'IBM Plex Mono'; margin-right:8px; }
 
   /* Cart drawer */
   #overlay{ position:fixed; inset:0; background:rgba(46,29,20,0.5); display:none; z-index:20; }
@@ -148,11 +140,8 @@
 <main id="menuRoot"></main>
 
 <div id="cartBar" onclick="openDrawer()">
-  <div class="cart-left">
-    <span class="badge" id="cartCount">0</span>
-    <span id="cartTotalTag">R$ 0,00</span>
-  </div>
-  <div class="cta">Finalizar pedido <span class="arrow">→</span></div>
+  <span><span class="count" id="cartCount">0</span>itens no carrinho</span>
+  <span id="cartTotalTag">R$ 0,00</span>
 </div>
 
 <div id="overlay" onclick="closeDrawer()"></div>
