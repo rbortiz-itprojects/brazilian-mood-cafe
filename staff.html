@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brazilian Mood — Staff</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --cream:#FBF6EC; --ink:#2E1D14; --green:#1B4332; --gold:#E8A93D; --terracotta:#C1440E; --line:rgba(46,29,20,0.14); }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--cream); color:var(--ink); font-family:'Work Sans', sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+  .wrap{ max-width:420px; width:100%; padding:24px; }
+  h1{ font-family:'Fraunces', serif; text-align:center; margin-bottom:28px; }
+  a.card{
+    display:block; background:#fff; border:1px solid var(--line); border-radius:14px;
+    padding:18px 20px; margin-bottom:14px; text-decoration:none; color:var(--ink);
+  }
+  a.card h2{ font-family:'Fraunces'; font-size:1.05rem; margin:0 0 4px; }
+  a.card p{ margin:0; font-size:0.85rem; color:#5c4b3f; }
+  a.card.kitchen{ border-left:4px solid var(--gold); }
+  a.card.admin{ border-left:4px solid var(--green); }
+  a.card.qr{ border-left:4px solid var(--terracotta); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Brazilian Mood — Staff</h1>
+    <a class="card kitchen" href="kitchen.html">
+      <h2>🍳 Kitchen dashboard</h2>
+      <p>Live orders, timers, mark in preparation / done</p>
+    </a>
+    <a class="card admin" href="admin.html">
+      <h2>📋 Manage menu</h2>
+      <p>Edit categories, items, prices, availability</p>
+    </a>
+    <a class="card qr" href="qr-codes.html">
+      <h2>🔳 Table QR codes</h2>
+      <p>Generate and print QR codes for each table</p>
+    </a>
+  </div>
+</body>
+</html>
