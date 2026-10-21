@@ -71,9 +71,9 @@ insert into public.tables (number) values (1),(2),(3),(4),(5)
 
 -- ---------- Seed: categories ----------
 insert into public.categories (name, sort_order) values
-  ('Salgados', 1),
-  ('Doces', 2),
-  ('Bebidas', 3)
+  ('Savoury', 1),
+  ('Sweets', 2),
+  ('Drinks', 3)
 on conflict do nothing;
 
 -- ---------- Seed: menu items ----------
@@ -81,14 +81,14 @@ with cat as (select id, name from public.categories)
 insert into public.menu_items (category_id, name, description, price_cents, image_url, notes, sort_order)
 select cat.id, v.name, v.description, v.price_cents, v.image_url, v.notes, v.sort_order
 from (values
-  ('Salgados','Coxinha de Frango','Shredded chicken, shaped like a drumstick, fried until golden',700,'https://images.unsplash.com/photo-1626082927389-6cd097cee6a6?w=600','Contains gluten',1),
-  ('Salgados','Pão de Queijo (6un)','Warm Brazilian cheese bread, naturally gluten-free',900,'https://images.unsplash.com/photo-1619894991209-9f9694be045b?w=600','Gluten-free',2),
-  ('Salgados','Pastel de Carne','Crispy fried pastry filled with seasoned beef',800,'https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?w=600','',3),
-  ('Doces','Brigadeiro (3un)','Classic chocolate fudge balls rolled in sprinkles',600,'https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=600','Contains dairy',1),
-  ('Doces','Bolo de Fubá','Traditional Brazilian cornmeal cake',650,'https://images.unsplash.com/photo-1509365465985-25d11c17e812?w=600','',2),
-  ('Bebidas','Guaraná Antarctica','Brazilian soft drink, 350ml can',500,'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600','',1),
-  ('Bebidas','Café Coado','Traditional Brazilian filtered coffee',450,'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600','',2),
-  ('Bebidas','Suco de Maracujá','Fresh passionfruit juice',700,'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=600','',3)
+  ('Savoury','Coxinha de Frango','Shredded chicken, shaped like a drumstick, fried until golden',700,'https://images.unsplash.com/photo-1626082927389-6cd097cee6a6?w=600','Contains gluten',1),
+  ('Savoury','Pão de Queijo (6un)','Warm Brazilian cheese bread, naturally gluten-free',900,'https://images.unsplash.com/photo-1619894991209-9f9694be045b?w=600','Gluten-free',2),
+  ('Savoury','Pastel de Carne','Crispy fried pastry filled with seasoned beef',800,'https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?w=600','',3),
+  ('Sweets','Brigadeiro (3un)','Classic chocolate fudge balls rolled in sprinkles',600,'https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=600','Contains dairy',1),
+  ('Sweets','Bolo de Fubá','Traditional Brazilian cornmeal cake',650,'https://images.unsplash.com/photo-1509365465985-25d11c17e812?w=600','',2),
+  ('Drinks','Guaraná Antarctica','Brazilian soft drink, 350ml can',500,'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600','',1),
+  ('Drinks','Café Coado','Traditional Brazilian filtered coffee',450,'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600','',2),
+  ('Drinks','Suco de Maracujá','Fresh passionfruit juice',700,'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=600','',3)
 ) as v(cat_name, name, description, price_cents, image_url, notes, sort_order)
 join cat on cat.name = v.cat_name;
 
