@@ -3,18 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cardápio — Mesa</title>
+<title>Menu — Brazilian Mood</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --cream:#FBF6EC;
-    --ink:#2E1D14;
-    --green:#1B4332;
-    --gold:#E8A93D;
-    --terracotta:#C1440E;
-    --line: rgba(46,29,20,0.14);
+    --cream:#FAF6EC;
+    --ink:#1B2A36;
+    --navy:#0C2F4F;
+    --blue:#14588F;
+    --green:#1E6B3C;
+    --gold:#C9A04F;
+    --gold-deep:#8F6A22;
+    --gold-bright:#E8A92A;
+    --terracotta:var(--blue);
+    --line: rgba(27,42,54,0.14);
     --radius: 14px;
   }
   *{box-sizing:border-box;}
@@ -24,23 +28,23 @@
     padding-bottom: 110px;
   }
   header.top{
-    background:var(--green); color:var(--cream);
-    padding:22px 20px 26px;
-    position:relative;
+    background:var(--navy); color:var(--cream);
+    padding:18px 20px 30px;
+    position:relative; text-align:center;
+    border-bottom:3px solid var(--gold);
   }
+  header.top img.logo{ height:96px; width:auto; display:block; margin:0 auto 6px; }
   header.top::after{
     content:"";
     position:absolute; left:0; right:0; bottom:-1px; height:14px;
-    background-image: radial-gradient(circle at 7px 0, transparent 7px, var(--green) 7.5px);
+    background-image: radial-gradient(circle at 7px 0, transparent 7px, var(--navy) 7.5px);
     background-size: 14px 14px;
     background-position: 0 -7px;
   }
-  header.top h1{
-    font-family:'Fraunces', serif; font-weight:700; font-size:1.6rem; margin:0 0 2px;
-  }
+  header.top h1{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
   header.top .table-tag{
     font-family:'IBM Plex Mono', monospace; font-size:0.8rem;
-    color:var(--gold); letter-spacing:0.03em;
+    color:var(--gold-bright); letter-spacing:0.08em; text-transform:uppercase;
   }
   nav.cats{
     display:flex; gap:8px; overflow-x:auto; padding:18px 16px 4px;
@@ -53,7 +57,7 @@
     font-family:'Work Sans'; font-weight:600; font-size:0.85rem;
     cursor:pointer;
   }
-  nav.cats button.active{ background:var(--terracotta); border-color:var(--terracotta); color:#fff; }
+  nav.cats button.active{ background:var(--navy); border-color:var(--navy); color:var(--gold-bright); }
 
   main{ padding:16px; max-width:640px; margin:0 auto; }
   section.category h2{
@@ -69,8 +73,8 @@
   }
   .item-info{ flex:1; min-width:0; }
   .item-info h3{ margin:0 0 4px; font-size:1rem; font-family:'Work Sans'; font-weight:600; }
-  .item-info p.desc{ margin:0 0 6px; font-size:0.85rem; color:#5c4b3f; line-height:1.35; }
-  .item-info p.notes{ margin:0 0 6px; font-size:0.75rem; color:var(--terracotta); font-style:italic; }
+  .item-info p.desc{ margin:0 0 6px; font-size:0.85rem; color:#4a5963; line-height:1.35; }
+  .item-info p.notes{ margin:0 0 6px; font-size:0.75rem; color:var(--gold-deep); font-style:italic; }
   .item-row-bottom{ display:flex; align-items:center; justify-content:space-between; }
   .price{ font-family:'IBM Plex Mono', monospace; font-weight:500; }
   button.add-btn{
@@ -85,9 +89,9 @@
 
   /* Cart bar */
   #cartBar{
-    position:fixed; left:16px; right:16px; bottom:16px; background:var(--terracotta); color:#fff;
+    position:fixed; left:16px; right:16px; bottom:16px; background:var(--green); color:#fff; border:2px solid var(--gold);
     padding:16px 22px; border-radius:14px; display:none; align-items:center; justify-content:space-between;
-    cursor:pointer; font-weight:700; box-shadow:0 6px 20px rgba(46,29,20,0.35);
+    cursor:pointer; font-weight:700; box-shadow:0 6px 20px rgba(12,47,79,0.4);
     z-index:15; transition:transform 0.15s ease;
   }
   #cartBar:active{ transform:scale(0.97); }
@@ -100,7 +104,7 @@
   #cartBar .cta .arrow{ font-size:1.1rem; }
 
   /* Cart drawer */
-  #overlay{ position:fixed; inset:0; background:rgba(46,29,20,0.5); display:none; z-index:20; }
+  #overlay{ position:fixed; inset:0; background:rgba(12,47,79,0.55); display:none; z-index:20; }
   #drawer{
     position:fixed; right:0; top:0; bottom:0; width:100%; max-width:420px;
     background:var(--cream); z-index:21; transform:translateX(100%);
@@ -131,7 +135,7 @@
   #confirmScreen{ text-align:center; padding:60px 24px; }
   #confirmScreen h2{ font-family:'Fraunces'; }
   #confirmScreen .stamp{
-    font-family:'IBM Plex Mono'; background:var(--gold); color:var(--ink);
+    font-family:'IBM Plex Mono'; background:var(--gold-bright); color:var(--ink);
     display:inline-block; padding:8px 18px; border-radius:8px; margin:16px 0; font-weight:600;
   }
 </style>
@@ -139,8 +143,9 @@
 <body>
 
 <header class="top">
+  <img class="logo" src="logo.png" alt="Brazilian Mood, authentic taste">
   <h1>Brazilian Mood</h1>
-  <div class="table-tag" id="tableTag">MESA —</div>
+  <div class="table-tag" id="tableTag">Table —</div>
 </header>
 
 <nav class="cats" id="catNav"></nav>
@@ -150,35 +155,35 @@
 <div id="cartBar" onclick="openDrawer()">
   <div class="cart-left">
     <span class="badge" id="cartCount">0</span>
-    <span id="cartTotalTag">R$ 0,00</span>
+    <span id="cartTotalTag">$0.00</span>
   </div>
-  <div class="cta">Finalizar pedido <span class="arrow">→</span></div>
+  <div class="cta">Review order <span class="arrow">→</span></div>
 </div>
 
 <div id="overlay" onclick="closeDrawer()"></div>
 <div id="drawer">
   <div class="drawer-head">
-    <h2>Seu pedido</h2>
+    <h2>Your order</h2>
     <button onclick="closeDrawer()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;">&times;</button>
   </div>
   <div class="drawer-body" id="cartLines"></div>
   <div class="drawer-foot" id="checkoutForm">
-    <div class="total-row"><span>Total</span><span id="drawerTotal">R$ 0,00</span></div>
-    <input type="text" id="custName" placeholder="Seu primeiro nome *" required>
-    <input type="tel" id="custPhone" placeholder="Telefone (opcional, para SMS)">
+    <div class="total-row"><span>Total</span><span id="drawerTotal">$0.00</span></div>
+    <input type="text" id="custName" placeholder="Your first name *" required>
+    <input type="tel" id="custPhone" placeholder="Mobile number (optional, for SMS updates)" inputmode="tel">
     <label class="checkbox">
       <input type="checkbox" id="smsOptIn">
-      Quero receber SMS sobre o status do meu pedido
+      Text me updates about my order
     </label>
-    <button class="primary" id="sendOrderBtn" onclick="submitOrder()">Enviar pedido para a cozinha</button>
+    <button class="primary" id="sendOrderBtn" onclick="submitOrder()">Send order to the kitchen</button>
   </div>
 </div>
 
 <div id="confirmScreen" style="display:none;">
-  <h2>Pedido enviado! 🎉</h2>
-  <p>A cozinha já recebeu seu pedido.</p>
+  <h2>Order sent! 🎉</h2>
+  <p>The kitchen has your order.</p>
   <div class="stamp" id="orderRef"></div>
-  <p>Fique à vontade, vamos te avisar quando estiver pronto.</p>
+  <p>Take a seat and relax. We'll let you know when it's ready.</p>
 </div>
 
 <script src="config.js"></script>
@@ -188,15 +193,43 @@ let items = [];
 let cart = {}; // menu_item_id -> {item, qty, notes}
 const params = new URLSearchParams(location.search);
 const tableNumber = params.get('table') || '?';
-document.getElementById('tableTag').textContent = `MESA ${tableNumber}`;
+document.getElementById('tableTag').textContent = `Table ${tableNumber}`;
 
-function money(cents){ return 'R$ ' + (cents/100).toFixed(2).replace('.', ','); }
+// Turns 0412 345 678 into +61412345678 (needed for SMS delivery)
+function normalisePhone(raw){
+  let d = raw.replace(/[^\d+]/g, '');
+  if (d.startsWith('+')) return d;
+  if (d.startsWith('0')) return '+61' + d.slice(1);
+  if (d.startsWith('61')) return '+' + d;
+  return d;
+}
+
+function money(cents){ return '$' + (cents/100).toFixed(2); }
+
+function showMenuMessage(msg){
+  document.getElementById('menuRoot').innerHTML =
+    `<p style="text-align:center;padding:48px 16px;color:#5c4b3f;">${msg}</p>`;
+}
 
 async function loadMenu(){
-  const { data: cats } = await supabaseClient.from('categories').select('*').order('sort_order');
-  const { data: mi } = await supabaseClient.from('menu_items').select('*').order('sort_order');
-  categories = cats || []; items = mi || [];
-  renderNav(); renderMenu();
+  try {
+    const { data: cats, error: e1 } = await supabaseClient.from('categories').select('*').eq('active', true).order('sort_order');
+    const { data: mi, error: e2 } = await supabaseClient.from('menu_items').select('*').eq('active', true).order('sort_order');
+    if (e1 || e2){
+      console.error('Menu load error:', e1 || e2);
+      showMenuMessage('We couldn\'t load the menu. Please ask a staff member for help.');
+      return;
+    }
+    categories = cats || []; items = mi || [];
+    if (!items.length){
+      showMenuMessage('The menu is empty right now. Please ask a staff member for help.');
+      return;
+    }
+    renderNav(); renderMenu();
+  } catch (err){
+    console.error('Menu load failed:', err);
+    showMenuMessage('We couldn\'t connect to the menu. Please check your connection or ask a staff member for help.');
+  }
 }
 
 function renderNav(){
@@ -234,7 +267,7 @@ function renderItem(item){
       <div class="item-row-bottom">
         <span class="price">${money(item.price_cents)}</span>
         <div id="ctrl-${item.id}">
-          <button class="add-btn" onclick="addToCart('${item.id}')">Adicionar</button>
+          <button class="add-btn" onclick="addToCart('${item.id}')">Add</button>
         </div>
       </div>
     </div>
@@ -260,7 +293,7 @@ function refreshItemControl(id){
   const el = document.getElementById('ctrl-'+id);
   if (!el) return;
   const line = cart[id];
-  if (!line) { el.innerHTML = `<button class="add-btn" onclick="addToCart('${id}')">Adicionar</button>`; return; }
+  if (!line) { el.innerHTML = `<button class="add-btn" onclick="addToCart('${id}')">Add</button>`; return; }
   el.innerHTML = `<div class="qty-controls">
     <button onclick="changeQty('${id}',-1)">−</button>
     <span>${line.qty}</span>
@@ -286,7 +319,7 @@ function refreshCartBar(){
 function renderCartLines(){
   const wrap = document.getElementById('cartLines');
   const lines = Object.entries(cart);
-  if (!lines.length){ wrap.innerHTML = '<p style="color:#8a7a6d;">Seu carrinho está vazio.</p>'; return; }
+  if (!lines.length){ wrap.innerHTML = '<p style="color:#8a7a6d;">Your order is empty.</p>'; return; }
   wrap.innerHTML = lines.map(([id,l]) => `
     <div class="cart-line">
       <div style="flex:1;">
@@ -294,7 +327,7 @@ function renderCartLines(){
           <strong>${l.qty}x ${l.item.name}</strong>
           <span class="price">${money(l.item.price_cents * l.qty)}</span>
         </div>
-        <input class="notes-input" placeholder="Alguma observação? (ex: sem açúcar)"
+        <input class="notes-input" placeholder="Any notes? (e.g. no sugar)"
           value="${l.notes}" onchange="setNote('${id}', this.value)">
       </div>
     </div>
@@ -314,13 +347,13 @@ function closeDrawer(){
 
 async function submitOrder(){
   const name = document.getElementById('custName').value.trim();
-  const phone = document.getElementById('custPhone').value.trim();
+  const phone = normalisePhone(document.getElementById('custPhone').value.trim());
   const smsOptIn = document.getElementById('smsOptIn').checked;
-  if (!name){ alert('Por favor, digite seu nome.'); return; }
-  if (!cartCount()){ alert('Seu carrinho está vazio.'); return; }
+  if (!name){ alert('Please enter your first name.'); return; }
+  if (!cartCount()){ alert('Your order is empty.'); return; }
 
   const btn = document.getElementById('sendOrderBtn');
-  btn.disabled = true; btn.textContent = 'Enviando...';
+  btn.disabled = true; btn.textContent = 'Sending...';
 
   const { data: order, error } = await supabaseClient.from('orders').insert({
     table_number: parseInt(tableNumber) || 0,
@@ -331,7 +364,7 @@ async function submitOrder(){
     status: 'new'
   }).select().single();
 
-  if (error){ alert('Erro ao enviar pedido: ' + error.message); btn.disabled=false; btn.textContent='Enviar pedido para a cozinha'; return; }
+  if (error){ alert('Sorry, we couldn\'t send your order: ' + error.message); btn.disabled=false; btn.textContent='Send order to the kitchen'; return; }
 
   const lineItems = Object.values(cart).map(l => ({
     order_id: order.id,
@@ -348,7 +381,7 @@ async function submitOrder(){
   document.getElementById('catNav').style.display = 'none';
   document.getElementById('cartBar').style.display = 'none';
   document.getElementById('confirmScreen').style.display = 'block';
-  document.getElementById('orderRef').textContent = 'PEDIDO #' + order.id.slice(0,8).toUpperCase();
+  document.getElementById('orderRef').textContent = 'ORDER #' + order.id.slice(0,8).toUpperCase();
 }
 
 loadMenu();

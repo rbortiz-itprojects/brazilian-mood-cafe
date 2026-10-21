@@ -6,7 +6,7 @@
 <title>Brazilian Mood — Staff</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{ --cream:#FBF6EC; --ink:#2E1D14; --green:#1B4332; --gold:#E8A93D; --terracotta:#C1440E; --line:rgba(46,29,20,0.14); }
+  :root{ --cream:#FAF6EC; --ink:#1B2A36; --navy:#0C2F4F; --blue:#14588F; --green:#1E6B3C; --gold:#C9A04F; --gold-bright:#E8A92A; --line:rgba(27,42,54,0.14); }
   *{box-sizing:border-box;}
   body{ margin:0; background:var(--cream); color:var(--ink); font-family:'Work Sans', sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; }
   .wrap{ max-width:420px; width:100%; padding:24px; }
@@ -19,12 +19,15 @@
   a.card p{ margin:0; font-size:0.85rem; color:#5c4b3f; }
   a.card.kitchen{ border-left:4px solid var(--gold); }
   a.card.admin{ border-left:4px solid var(--green); }
-  a.card.qr{ border-left:4px solid var(--terracotta); }
+  a.card.qr{ border-left:4px solid var(--blue); }
+  .logo-wrap{ background:var(--navy); border-bottom:3px solid var(--gold); border-radius:14px; padding:16px; margin-bottom:22px; text-align:center; }
+  .logo-wrap img{ height:110px; width:auto; }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Brazilian Mood — Staff</h1>
+    <div class="logo-wrap"><img src="logo.png" alt="Brazilian Mood"></div>
+    <h1>Staff hub</h1>
     <a class="card kitchen" href="kitchen.html">
       <h2>🍳 Kitchen dashboard</h2>
       <p>Live orders, timers, mark in preparation / done</p>

@@ -3,18 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — Gerenciar Cardápio</title>
+<title>Menu manager — Brazilian Mood</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root{ --cream:#FBF6EC; --ink:#2E1D14; --green:#1B4332; --gold:#E8A93D; --terracotta:#C1440E; --line:rgba(46,29,20,0.14); }
+  :root{ --cream:#FAF6EC; --ink:#1B2A36; --navy:#0C2F4F; --blue:#14588F; --green:#1E6B3C; --gold:#C9A04F; --gold-deep:#8F6A22; --gold-bright:#E8A92A; --terracotta:#A8321E; --line:rgba(27,42,54,0.14); }
   *{box-sizing:border-box;}
   body{ margin:0; background:var(--cream); color:var(--ink); font-family:'Work Sans', sans-serif; }
-  header{ background:var(--green); color:#fff; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; }
+  header{ background:var(--navy); border-bottom:3px solid var(--gold); color:#fff; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; }
   header h1{ font-family:'Fraunces'; margin:0; font-size:1.3rem; }
   header button{ background:transparent; border:1px solid rgba(255,255,255,0.5); color:#fff; padding:6px 14px; border-radius:8px; cursor:pointer; }
 
   #loginScreen{ max-width:360px; margin:80px auto; padding:24px; background:#fff; border-radius:14px; border:1px solid var(--line); }
+  header .brand{ display:flex; align-items:center; gap:14px; }
+  header .brand img{ height:48px; width:auto; }
+  #loginScreen img.logo{ display:block; height:90px; margin:0 auto 12px; background:var(--navy); padding:10px 16px; border-radius:10px; }
   #loginScreen h2{ font-family:'Fraunces'; margin-top:0; }
   #loginScreen input{ width:100%; padding:10px; margin-bottom:10px; border:1px solid var(--line); border-radius:8px; }
   #loginScreen button{ width:100%; background:var(--green); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:700; cursor:pointer; }
@@ -41,36 +44,37 @@
 <body>
 
 <div id="loginScreen">
-  <h2>Login administrativo</h2>
-  <input type="email" id="loginEmail" placeholder="E-mail">
-  <input type="password" id="loginPassword" placeholder="Senha">
-  <button onclick="doLogin()">Entrar</button>
+  <img class="logo" src="logo.png" alt="Brazilian Mood">
+  <h2>Admin login</h2>
+  <input type="email" id="loginEmail" placeholder="Email">
+  <input type="password" id="loginPassword" placeholder="Password">
+  <button onclick="doLogin()">Log in</button>
   <p id="loginError"></p>
-  <p style="font-size:0.8rem;color:#8a7a6d;">Crie o usuário admin em Supabase &gt; Authentication &gt; Users.</p>
+  <p style="font-size:0.8rem;color:#8a7a6d;">Create the admin user in Supabase &gt; Authentication &gt; Users.</p>
 </div>
 
 <div id="app" style="display:none;">
   <header>
-    <h1>Gerenciar Cardápio</h1>
-    <button onclick="logout()">Sair</button>
+    <div class="brand"><img src="logo.png" alt="Brazilian Mood"><h1>Menu manager</h1></div>
+    <button onclick="logout()">Log out</button>
   </header>
   <main>
     <div class="panel">
-      <h2>Categorias</h2>
+      <h2>Categories</h2>
       <div class="table-scroll">
       <table id="catTable">
         <colgroup>
           <col style="width:auto;"><col style="width:70px;"><col style="width:70px;"><col style="width:100px;">
         </colgroup>
-        <thead><tr><th>Nome</th><th>Ordem</th><th>Ativa</th><th></th></tr></thead>
+        <thead><tr><th>Name</th><th>Order</th><th>Active</th><th></th></tr></thead>
         <tbody id="catBody"></tbody>
       </table>
       </div>
-      <button class="btn-add" onclick="addCategoryRow()">+ Nova categoria</button>
+      <button class="btn-add" onclick="addCategoryRow()">+ New category</button>
     </div>
 
     <div class="panel">
-      <h2>Itens do cardápio</h2>
+      <h2>Menu items</h2>
       <div class="table-scroll">
       <table id="itemTable">
         <colgroup>
@@ -78,11 +82,11 @@
           <col style="width:70px;"><col style="width:220px;"><col style="width:130px;">
           <col style="width:60px;"><col style="width:100px;">
         </colgroup>
-        <thead><tr><th>Categoria</th><th>Nome</th><th>Descrição</th><th>Preço (R$)</th><th>Imagem (URL)</th><th>Obs.</th><th>Ativo</th><th></th></tr></thead>
+        <thead><tr><th>Category</th><th>Name</th><th>Description</th><th>Price ($)</th><th>Image (URL)</th><th>Notes</th><th>Active</th><th></th></tr></thead>
         <tbody id="itemBody"></tbody>
       </table>
       </div>
-      <button class="btn-add" onclick="addItemRow()">+ Novo item</button>
+      <button class="btn-add" onclick="addItemRow()">+ New item</button>
     </div>
   </main>
 </div>
@@ -122,8 +126,8 @@ function renderCategories(){
       <td class="active-toggle"><input type="checkbox" ${c.active?'checked':''} data-field="active"></td>
       <td>
         <div class="row-actions">
-          <button class="btn-save" onclick="saveCategory('${c.id}', this)">Salvar</button>
-          <button class="btn-delete" onclick="deleteCategory('${c.id}')">Excluir</button>
+          <button class="btn-save" onclick="saveCategory('${c.id}', this)">Save</button>
+          <button class="btn-delete" onclick="deleteCategory('${c.id}')">Delete</button>
         </div>
       </td>
     </tr>`).join('');
@@ -145,12 +149,12 @@ async function saveCategory(id, btn){
   loadAll();
 }
 async function deleteCategory(id){
-  if (!confirm('Excluir esta categoria e todos os seus itens?')) return;
+  if (!confirm('Delete this category and all of its items?')) return;
   await supabaseClient.from('categories').delete().eq('id', id);
   loadAll();
 }
 async function addCategoryRow(){
-  const name = prompt('Nome da nova categoria:');
+  const name = prompt('New category name:');
   if (!name) return;
   await supabaseClient.from('categories').insert({ name, sort_order: categories.length + 1, active: true });
   loadAll();
@@ -172,8 +176,8 @@ function renderItems(){
       <td class="active-toggle"><input type="checkbox" ${i.active?'checked':''} data-field="active"></td>
       <td>
         <div class="row-actions">
-          <button class="btn-save" onclick="saveItem('${i.id}', this)">Salvar</button>
-          <button class="btn-delete" onclick="deleteItem('${i.id}')">Excluir</button>
+          <button class="btn-save" onclick="saveItem('${i.id}', this)">Save</button>
+          <button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
         </div>
       </td>
     </tr>`).join('');
@@ -196,14 +200,14 @@ async function saveItem(id, btn){
   loadAll();
 }
 async function deleteItem(id){
-  if (!confirm('Excluir este item?')) return;
+  if (!confirm('Delete this item?')) return;
   await supabaseClient.from('menu_items').delete().eq('id', id);
   loadAll();
 }
 async function addItemRow(){
-  if (!categories.length){ alert('Crie uma categoria primeiro.'); return; }
+  if (!categories.length){ alert('Please create a category first.'); return; }
   await supabaseClient.from('menu_items').insert({
-    category_id: categories[0].id, name: 'Novo item', description: '', price_cents: 0,
+    category_id: categories[0].id, name: 'New item', description: '', price_cents: 0,
     image_url: '', notes: '', active: true, sort_order: items.length + 1
   });
   loadAll();

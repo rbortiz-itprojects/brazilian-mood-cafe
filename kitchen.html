@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cozinha — Painel de Pedidos</title>
+<title>Kitchen — Brazilian Mood</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --cream:#FBF6EC; --ink:#2E1D14; --green:#1B4332; --gold:#E8A93D; --terracotta:#C1440E;
+    --cream:#FAF6EC; --ink:#0C2F4F; --green:#1E6B3C; --gold:#E8A92A; --gold-deep:#8F6A22; --terracotta:#8F6A22;
     --line: rgba(46,29,20,0.14);
     --yellow-bg:#F7DE9A; --red-bg:#EFA69C;
   }
@@ -20,6 +20,8 @@
   }
   header h1{ font-family:'Fraunces', serif; margin:0; font-size:1.4rem; }
   header .clock{ font-family:'IBM Plex Mono'; color:var(--gold); }
+  header .brand{ display:flex; align-items:center; gap:14px; }
+  header .brand img{ height:48px; width:auto; }
   .board{
     display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
     gap:16px; padding:20px;
@@ -70,7 +72,7 @@
 <body>
 
 <header>
-  <h1>🍳 Painel da Cozinha</h1>
+  <div class="brand"><img src="logo.png" alt="Brazilian Mood"><h1>Kitchen orders</h1></div>
   <div class="clock" id="clock"></div>
 </header>
 
@@ -102,7 +104,7 @@ async function loadOrders(){
 }
 
 function statusLabel(s){
-  return { new: 'Novo', in_preparation: 'Em preparo', done: 'Pronto' }[s] || s;
+  return { new: 'New', in_preparation: 'In preparation', done: 'Done' }[s] || s;
 }
 
 function render(){
@@ -112,7 +114,7 @@ function render(){
   const visible = [...active, ...done];
 
   if (!visible.length){
-    board.innerHTML = '<div class="empty">Nenhum pedido no momento ☕</div>';
+    board.innerHTML = '<div class="empty">No orders right now ☕</div>';
     return;
   }
 
@@ -126,28 +128,28 @@ function render(){
       else if (mins >= 15) warnClass = 'warn-yellow';
       timerText = fmtElapsed(elapsedMs);
     } else if (o.status === 'done' && o.started_at && o.done_at){
-      timerText = fmtElapsed(new Date(o.done_at) - new Date(o.started_at)) + ' (total)';
+      timerText = fmtElapsed(new Date(o.done_at) - new Date(o.started_at)) + ' total';
     } else if (o.status === 'new'){
-      timerText = 'aguardando início';
+      timerText = 'waiting to start';
     }
 
     const itemsHtml = o.items.map(it => `
       <li><span class="qty">${it.quantity}x</span>${it.name_snapshot}
-        ${it.notes ? `<span class="note">obs: ${it.notes}</span>` : ''}
+        ${it.notes ? `<span class="note">Note: ${it.notes}</span>` : ''}
       </li>`).join('');
 
     let actionsHtml = '';
     if (o.status === 'new'){
-      actionsHtml = `<button class="btn-start" onclick="setStatus('${o.id}','in_preparation')">Iniciar preparo</button>`;
+      actionsHtml = `<button class="btn-start" onclick="setStatus('${o.id}','in_preparation')">Start preparing</button>`;
     } else if (o.status === 'in_preparation'){
-      actionsHtml = `<button class="btn-done" onclick="setStatus('${o.id}','done')">Marcar como pronto</button>`;
+      actionsHtml = `<button class="btn-done" onclick="setStatus('${o.id}','done')">Mark as done</button>`;
     } else {
-      actionsHtml = `<button class="btn-none" disabled>Concluído</button>`;
+      actionsHtml = `<button class="btn-none" disabled>Completed</button>`;
     }
 
     return `<div class="ticket status-${o.status} ${warnClass}">
       <div class="ticket-top">
-        <span class="table-badge">MESA ${o.table_number}</span>
+        <span class="table-badge">TABLE ${o.table_number}</span>
         <span class="status-pill ${o.status}">${statusLabel(o.status)}</span>
       </div>
       <div class="customer">${o.customer_name}</div>
@@ -167,7 +169,7 @@ async function setStatus(id, newStatus){
 }
 
 function tickClock(){
-  document.getElementById('clock').textContent = new Date().toLocaleTimeString('pt-BR');
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-AU');
 }
 setInterval(tickClock, 1000); tickClock();
 

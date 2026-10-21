@@ -2,22 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>QR Codes — Mesas</title>
+<title>Table QR codes — Brazilian Mood</title>
 <style>
   body{ font-family:sans-serif; background:#f2f2f2; padding:24px; }
   .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
   .card{ background:#fff; border-radius:12px; padding:16px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.1); }
   .card h2{ margin:6px 0; }
-  .card img{ width:180px; height:180px; }
+  .card img.qr{ width:180px; height:180px; }
+  .card img.logo{ height:70px; width:auto; background:#0C2F4F; padding:8px 14px; border-radius:8px; margin-bottom:6px; }
+  .card .scan{ margin:6px 0 0; font-size:0.9rem; color:#1B2A36; }
   input{ width:280px; padding:8px; margin:8px 0; }
   @media print { body{ background:#fff; } input, button.controls{ display:none; } }
 </style>
 </head>
 <body>
-  <h1>Gerador de QR Codes das mesas</h1>
-  <!-- <p>Base URL da página do cliente — sua URL de produção do Vercel, sem barra no final (ex: <code>https://brazilian-mood-cafe.vercel.app</code>):</p> -->
-  <input type="text" id="baseUrl" value="https://brazilian-mood-cafe.vercel.app" onchange="render()">
-  <p>Número de mesas: <input type="number" id="numTables" value="5" style="width:60px;" onchange="render()"></p>
+  <h1>Table QR codes</h1>
+  <p>Your live website address, with no slash at the end (e.g. <code>https://brazilian-mood-cafe.vercel.app</code>):</p>
+  <input type="text" id="baseUrl" value="https://YOUR-APP.vercel.app" onchange="render()">
+  <p>Number of tables: <input type="number" id="numTables" value="5" style="width:60px;" onchange="render()"></p>
   <div class="grid" id="grid"></div>
 
 <script>
@@ -31,7 +33,7 @@ function render(){
     const qrImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
     const div = document.createElement('div');
     div.className = 'card';
-    div.innerHTML = `<h2>Mesa ${i}</h2><img src="${qrImgSrc}" alt="QR mesa ${i}"><p style="font-size:0.75rem;word-break:break-all;">${url}</p>`;
+    div.innerHTML = `<img class="logo" src="logo.png" alt="Brazilian Mood"><h2>Table ${i}</h2><img class="qr" src="${qrImgSrc}" alt="QR code for table ${i}"><p class="scan">Scan to see the menu and order</p><p style="font-size:0.75rem;word-break:break-all;">${url}</p>`;
     grid.appendChild(div);
   }
 }
