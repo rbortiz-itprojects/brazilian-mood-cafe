@@ -29,8 +29,8 @@ export default async function handler(req, res) {
   if (old_record && old_record.status === record.status) return res.status(200).send('Skipped: no status change');
 
   const messages = {
-    in_preparation: `Oi ${record.customer_name}! Seu pedido na Brazilian Mood (mesa ${record.table_number}) está sendo preparado. 🍳`,
-    done: `${record.customer_name}, seu pedido está pronto! Pode retirar na mesa ${record.table_number}. 🎉`
+    in_preparation: `Hi ${record.customer_name}! Your order at Brazilian Mood (table ${record.table_number}) is now being prepared.`,
+    done: `Hi ${record.customer_name}, your order for table ${record.table_number} is ready. Enjoy!`
   };
   const body = messages[record.status];
   if (!body) return res.status(200).send('Skipped: no message for this status');
